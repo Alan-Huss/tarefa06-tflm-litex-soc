@@ -121,7 +121,6 @@ int main(void) {
         // Calcula LEDs
         uint8_t leds = sine_to_led_bar(y_val);
         leds_8bit_out_write(leds); // Atualiza hardware
-
         // --- DEBUG COMPLETO ---
         int d1 = (int)y_val;
         int d2 = (int)((fabs(y_val) - abs(d1)) * 100);

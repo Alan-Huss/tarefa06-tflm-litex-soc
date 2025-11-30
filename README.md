@@ -18,6 +18,25 @@ O projeto executa o modelo *Hello World* (Senoide), onde a inferência da rede n
 * **Interface de Comunicação:** UART (Serial via USB)
 * **Periféricos:** LEDs onboard (controlados via CSR)
 
+
+## 🧷 Mapa de Pinos – LEDs (GPIO 8 bits)
+
+Cada bit no registrador `leds_8bit_out_write` acende exatamente um LED.
+A tabela abaixo mostra o valor binário correspondente a cada LED.
+
+| LED (barra) | Bit em `leds_8bit_out_write` | Valor binário do bit | Pino da FPGA (ECP5) | Observação |
+|-------------|------------------------------|-----------------------|----------------------|------------|
+| LED0        | bit 0 (LSB)                  | 0b00000001            | **P17**              | LED mais à direita |
+| LED1        | bit 1                        | 0b00000010            | **P18**              |            |
+| LED2        | bit 2                        | 0b00000100            | **N18**              |            |
+| LED3        | bit 3                        | 0b00001000            | **L20**              |            |
+| LED4        | bit 4                        | 0b00010000            | **L18**              |            |
+| LED5        | bit 5                        | 0b00100000            | **G20**              |            |
+| LED6        | bit 6                        | 0b01000000            | **M18**              |            |
+| LED7        | bit 7 (MSB)                  | 0b10000000            | **N17**              | LED mais à esquerda |
+
+---
+
 ### Software
 * **Sistema Operacional:** Linux (Ubuntu)
 * **Framework SoC:** [LiteX](https://github.com/enjoy-digital/litex)
