@@ -13,7 +13,7 @@ O projeto executa o modelo *Hello World* (Senoide), onde a inferência da rede n
 ## 🛠️ Hardware e Ferramentas Utilizadas
 
 ### Hardware
-* **Placa FPGA:** Colorlight i5 (Lattice ECP5)
+* **Placa FPGA:** Colorlight i9 (Lattice ECP5)
 * **Microcontrolador (Soft-core):** VexRiscv (RISC-V 32-bit `rv32im`)
 * **Interface de Comunicação:** UART (Serial via USB)
 * **Periféricos:** LEDs onboard (controlados via CSR)
@@ -54,7 +54,8 @@ A tabela abaixo mostra o valor binário correspondente a cada LED.
 │   ├── linker.ld         # Script de linkagem para VexRiscv
 │   ├── tflm/             # Código fonte do TensorFlow Lite Micro (Submódulo/Cópia)
 │   └── models/           # Dados do modelo treinado (Arrays C)
-├── build/                # Artefatos gerados pelo LiteX (CSRs, bibliotecas base)
+├─ litex/                 # Definição de plataforma e mapeamento de pinos (I/O) da Colorlight i5
+|─ build/                 # Artefatos gerados pelo LiteX (CSRs, bibliotecas base)
 └── README.md             # Documentação do projeto
 ```
 
