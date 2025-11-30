@@ -58,6 +58,94 @@ A tabela abaixo mostra o valor binário correspondente a cada LED.
 └── README.md             # Documentação do projeto
 ```
 
+## 🧩 Porte do TensorFlow Lite Micro para o SoC LiteX / VexRiscv
+
+O firmware desta tarefa foi desenvolvido em ambiente **bare-metal C**, rodando sobre o
+SoC LiteX com CPU **VexRiscv**.  
+Para isso, foi realizado o **porte do TensorFlow Lite Micro (TFLM)** para a nova
+plataforma, incluindo:
+
+- Geração de uma árvore mínima do TFLM;
+- Ajustes para compilação cruzada com GCC RISC-V;
+- Criação de Makefiles dedicados;
+- Redução do conjunto de operadores;
+- Configuração da `tensor_arena` e do runtime TFLM.
+
+---
+
+### 📌 1. Clonando o TensorFlow Lite Micro
+
+Inicialmente foi feito o clone recursivo do repositório oficial:
+
+```bash
+git clone --recursive https://github.com/tensorflow/tflite-micro.git
+```
+
+### 📌 2. Geração do projeto mínimo usando o criador de árvores TFLM
+
+O TensorFlow Lite Micro possui uma ferramenta oficial de geração de projetos para novas
+plataformas.
+Ela organiza os diretórios, copia somente os arquivos necessários e prepara uma base
+limpa para portar o runtime.
+
+O comando utilizado foi:
+
+```bash
+python3 tensorflow/lite/micro/tools/project_generation/create_tflm_tree.py \
+    -e hello_world \
+    ~/Documentos/tflm/firmware/tflm/
+```
+
+Onde:
+
+* `e hello_world`
+<br>→ Indica que o exemplo hello_world será incluído na árvore do projeto.
+
+* `~/Documentos/tflm/firmware/tflm/`
+<br>→ Diretório destino contendo a cópia mínima da biblioteca TFLM
+    (este diretório está presente no repositório deste projeto).
+
+O resultado é uma pasta contendo:
+
+```bash
+tflm/
+ ├── tensorflow/
+ ├── third_party/
+ ├── signal/
+ ├── make/
+ ├── examples/
+ └── Makefile (base, modificado para RISC-V)
+```
+Essa estrutura serve como “SDK" do TFLM para nossa plataforma.
+
+### 📌 3. Ajustes para compilação no ambiente LiteX / VexRiscv
+
+Após gerar a árvore TFLM, foram feitos os seguintes ajustes:
+
+* Compilação cruzada com o toolchain
+riscv-none-elf-gcc (xPack GCC 15);
+
+* Criação de um Makefile próprio dentro de firmware/tflm/
+para gerar a biblioteca libtflm.a;
+
+* Remoção de operadores desnecessários, mantendo apenas o requerido pelo modelo
+(sine) via MicroMutableOpResolver;
+
+* Definição de uma tensor_arena de 4000 bytes, suficiente para o modelo
+hello_world quantizado.
+
+A compilação da biblioteca é feita com:
+
+```bash
+cd firmware/tflm
+make -j12
+```
+
+Gerando:
+
+```text
+libtflm.a
+```
 
 ## 🚀 Como Reproduzir
 ### 1. Clonar o Repositório
@@ -88,17 +176,7 @@ Gere o bitstream do SoC VexRiscv e carregue-o na placa.
 python3 litex/colorlight_i5.py --board i9 --revision 7.2 --cpu-type=vexriscv --build --load --ecppack-compress
 ```
 
-### 4. Compilar a Biblioteca TensorFlow Lite Micro
-
-Navegue até o diretório do TFLM e compile a biblioteca estática (`libtflm.a`).
-```Bash
-cd firmware/tflm
-
-# Limpa builds antigos e compila utilizando múltiplos núcleos (-j12) para rapidez
-make clean && make -j12
-```
-
-### 5. Compilar o Firmware da Aplicação
+### 4. Compilar o Firmware da Aplicação
 
 Retorne ao diretório do firmware e compile o binário final (main.bin), que une seu código C++ com a biblioteca gerada no passo anterior.
 
@@ -107,7 +185,7 @@ cd ../
 make clean && make
 ```
 
-### 6. Executar na FPGA
+### 5. Executar na FPGA
 
 Carregue o firmware compilado para a memória RAM do SoC através da interface serial.
 
@@ -116,7 +194,7 @@ Carregue o firmware compilado para a memória RAM do SoC através da interface s
 litex_term --kernel build/main.bin /dev/ttyACMxx
 ```
 
-### 7. Inicialização
+### 6. Inicialização
 
 Assim que o comando acima estiver aguardando (exibindo "Booting..."), force a reinicialização do processador para iniciar a execução do firmware:
 
@@ -125,6 +203,11 @@ reboot
 ```
 
 ## 📊 Resultados
+<div align="center">
+  <a href="https://youtu.be/_qyGwfRWc7w">
+    <img src="https://img.youtube.com/vi/_qyGwfRWc7w/0.jpg" alt="Demonstração em Vídeo" style="max-width: 100%; height: auto;">
+  </a>
+</div>
 
 Após carregar o firmware e reiniciar o processador (reboot), o sistema entrará no loop de inferência contínua. O funcionamento pode ser validado de duas formas:
 
@@ -139,6 +222,7 @@ A barra de LEDs da placa FPGA atuará como um display gráfico, oscilando suavem
 #### 2. Monitoramento Serial (UART)
 
 O terminal serial exibirá os dados da inferência em tempo real. Devido ao driver xprintf customizado incluído no main.cc, a saída apresenta o valor de ponto flutuante calculado e a representação binária direta do registro de LEDs.
+
 
 #### Exemplo de saída no console:
 
