@@ -152,8 +152,7 @@ libtflm.a
 ### 1. Clonar o Repositório
 
 ``` Bash
-
-git clone [https://github.com/Alan-Huss/tarefa06-tflm-litex-soc.git](https://github.com/Alan-Huss/tarefa06-tflm-litex-soc.git)
+git clone https://github.com/Alan-Huss/tarefa06-tflm-litex-soc.git
 cd tarefa06-tflm-litex-soc
 ```
 
